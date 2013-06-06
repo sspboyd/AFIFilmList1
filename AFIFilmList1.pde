@@ -2,23 +2,25 @@ import processing.opengl.*;
 
 float PHI = 0.618033989;
 
+Film[] films;
+
 PFont filmName;
 PFont yearLabel;
 
 String[] data;
+
 void setup() {
   background(255);
-  size(1300, 758);
+  size(1000, 618);
   smooth();
 
-  String fileName = "afiFilmList.txt";
-  data = loadStrings(fileName);
-  println("number of lines of data : " + (data.length - 1));
-  for (int i = 0; i < data.length - 1; i++) {
-    String[] pieces = split(data[i], TAB);
-    println("yesyew" + pieces[0]);
-  }
 
+  String fileName = "afiFilmList.txt";
+  films=getFilms(fileName);
+  for (Film f : films) {
+    f.targX = map(f.yr, 1910, 2017, 0, width);
+    f.targY = height;
+  }
 
   filmName = createFont("Helvetica", 48);
   yearLabel = createFont("Helvetica", 144);
@@ -28,12 +30,54 @@ void setup() {
 
 void draw() {
   background(255);
-  
- drawByRow();
+  pushMatrix();
+  translate(0,height);
+  rotate(-PI/2);
+  fill(200);
+  text("1910", 0, 34);
+  popMatrix();
+  pushMatrix();
+  translate(width, height);
+  rotate(-PI/2);
+    text("2025", 0, 0);
+    popMatrix();
+
+  for (Film f : films) {
+    f.update();
+    f.render();
+  }
+
+  //drawByRow();
 }
 
 
- void drawByRow(){
+Film[] getFilms(String fn) {
+  Film[] films;
+  int rowCount = 0;
+  String[] data = loadStrings(fn);
+  films = new Film[data.length-1];
+
+  println("number of lines of data : " + (data.length - 1));
+  for (int i = 0; i < data.length - 1; i++) {
+    Film f = new Film();
+    String[] pieces = split(data[i], TAB);
+    f.x = 0;
+    f.y = 0;
+    f.name = pieces[0];
+    f.yr = int(pieces[1]);
+    f.ranking = int(pieces[2]);
+    films[rowCount++] = f;
+  }
+  return films;
+}
+
+
+
+
+
+
+
+void drawByRow() {
   for (int i = 0; i < data.length - 1; i++) {
     String[] pieces = split(data[i], TAB);
     int yr = int(pieces[1]);
